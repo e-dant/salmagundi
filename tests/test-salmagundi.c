@@ -1,7 +1,11 @@
-#define HM_DEBUG
 #include "salmagundi.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdio.h>
+
+#ifndef HM_DEBUG
+#error "HM_DEBUG must be defined for map introspection"
+#endif
 
 #define FILEBASENAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -15,6 +19,15 @@
   if (assert(condition)) {                                                   \
     fprintf(stderr, "[%s:%d: Ok] %s\n", FILEBASENAME, __LINE__, #condition); \
   }
+
+
+void hm_print_item(hm_item_t item) {
+  printf("k=@%p, k_sz=%u, v=@%p, v_sz=%u\n", item.k, item.k_sz, item.v, item.v_sz);
+}
+
+void hm_print_hm_detail(hm_t* map) {
+  printf("cap=%u, sz=%u, n_collision=%u, n_probe=%u, n_grow=%u\n", map->cap, map->sz, map->n_collision, map->n_probe, map->n_grow);
+}
 
 void test_hm_lifetime(void) {
   hm_t* map = hm_open(hm_hash_djb1, hm_cmp_str);

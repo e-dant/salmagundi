@@ -6,14 +6,6 @@
 
 #ifdef HM_DEBUG
 #include <stdio.h>
-
-void hm_print_item(hm_item_t item) {
-  printf("k=@%p, k_sz=%u, v=@%p, v_sz=%u\n", item.k, item.k_sz, item.v, item.v_sz);
-}
-
-void hm_print_hm_detail(hm_t* map) {
-  printf("cap=%u, sz=%u, n_collision=%u, n_probe=%u, n_grow=%u\n", map->cap, map->sz, map->n_collision, map->n_probe, map->n_grow);
-}
 #endif
 
 hm_hash_t hm_hash_byte(void const* k, hm_sz_t k_sz) {
@@ -112,9 +104,6 @@ hm_sz_t hm_put(hm_t* map, void* k, hm_sz_t k_sz, void* v, hm_sz_t v_sz) {
   }
   void* v_mem = NULL;
   if (is_overwrite) {
-#ifdef HM_DEBUG
-    //printf("Overwriting item at idx=%u, cap=%u, sz=%u\n", idx, map->cap, map->sz);
-#endif
     v_mem = realloc(map->items[idx].v, v_sz);
   } else {
     v_mem = malloc(v_sz);
@@ -130,11 +119,6 @@ hm_sz_t hm_put(hm_t* map, void* k, hm_sz_t k_sz, void* v, hm_sz_t v_sz) {
   map->items[idx].v = v_mem;
   map->items[idx].v_sz = v_sz;
   map->sz += !is_overwrite;
-#ifdef HM_DEBUG
-  //printf("Put item at idx=%u\n", idx);
-  //hm_print_item(map->items[idx]);
-  //hm_print_hm_detail(map);
-#endif
   return idx;
 }
 

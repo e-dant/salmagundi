@@ -13,10 +13,10 @@ lib_salmagundi = library(
 
 test_salmagundi = executable(
   'test-salmagundi',
-  'tests/test-salmagundi.c',
+  ['tests/test-salmagundi.c', 'src/salmagundi.c'],
   include_directories : ['include'],
   install : false,
-  link_with : [lib_salmagundi],
+  c_args : ['-DHM_DEBUG'],
 )
 
 test('basic', test_salmagundi)

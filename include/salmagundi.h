@@ -38,9 +38,4 @@ void hm_iter(hm_t* map, void (*f)(hm_t*, hm_item_t));
 void hm_grow(hm_t* map);
 void hm_close(hm_t* map);
 
-#ifdef HM_DEBUG
-void hm_print_item(hm_item_t item);
-void hm_print_hm_detail(hm_t* map);
-#endif
-
 #endif /* BD9DF82A4540BB19368E48E4747C0706 */
