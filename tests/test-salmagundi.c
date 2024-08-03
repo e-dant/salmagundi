@@ -87,10 +87,10 @@ void* rand_open(void) {
   return NULL;
 }
 
-ssize_t rand_read(void* r, void* buf, size_t sz) {
+size_t rand_read(void* r, void* buf, size_t sz) {
 #if SLOWRAND
   if (r) {
-    return fread(buf, 1, sz, r);
+    return (size_t)fread(buf, 1, sz, r);
   }
 #endif
   (void)r;
