@@ -145,8 +145,8 @@ void test_hm_torture(int8_t collision_rate, hm_hash_func hash_func) {
     char v[v_sz + 1];
     memset(k, 0, sizeof(k));
     memset(v, 0, sizeof(v));
-    ssize_t k_read = rand_read(r, k, k_sz);
-    ssize_t v_read = rand_read(r, v, v_sz);
+    size_t k_read = rand_read(r, k, k_sz);
+    size_t v_read = rand_read(r, v, v_sz);
     assert(k_read == k_sz);
     assert(v_read == v_sz);
     k[k_sz] = 0;
