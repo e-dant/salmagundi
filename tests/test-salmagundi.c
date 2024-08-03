@@ -1,3 +1,4 @@
+#define HM_DEBUG
 #include "salmagundi.h"
 #include <stdio.h>
 #include <string.h>
