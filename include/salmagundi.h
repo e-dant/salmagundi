@@ -1,6 +1,7 @@
 #ifndef BD9DF82A4540BB19368E48E4747C0706
 #define BD9DF82A4540BB19368E48E4747C0706
 #include <stdlib.h>
+#include <stdint.h>
 
 typedef uint32_t hm_sz_t;
 typedef uint64_t hm_hash_t;
