@@ -1,5 +1,6 @@
 #ifndef BD9DF82A4540BB19368E48E4747C0706
 #define BD9DF82A4540BB19368E48E4747C0706
+// SPDX-License-Identifier: MIT OR Apache-2.0
 #include <stdlib.h>
 #include <stdint.h>
 #ifdef __cplusplus
