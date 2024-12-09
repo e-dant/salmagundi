@@ -10,7 +10,7 @@ void do_stuff(void) {
   char* k = "k";
   char* v = "v";
   hm_put(map, k, strlen(k), v, strlen(v));
-  hm_item_t stored = hm_get(map, k, k_sz);
+  hm_item_t stored = hm_get(map, k, strlen(k));
   assert(memcmp(stored.k, k, strlen(k)) == 0);
   assert(memcmp(stored.v, v, strlen(v)) == 0);
   hm_close(map);
