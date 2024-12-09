@@ -2,6 +2,9 @@
 #define BD9DF82A4540BB19368E48E4747C0706
 #include <stdlib.h>
 #include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef uint32_t hm_sz_t;
 typedef uint64_t hm_hash_t;
@@ -39,4 +42,7 @@ void hm_iter(hm_t* map, void (*f)(hm_t*, hm_item_t));
 void hm_grow(hm_t* map);
 void hm_close(hm_t* map);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* BD9DF82A4540BB19368E48E4747C0706 */
