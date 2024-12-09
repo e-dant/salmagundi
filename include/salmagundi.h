@@ -7,7 +7,7 @@ typedef uint32_t hm_sz_t;
 typedef uint64_t hm_hash_t;
 typedef hm_hash_t (*hm_hash_func)(void const*, hm_sz_t);
 typedef int8_t (*hm_cmp_func)(void const*, hm_sz_t, void const*, hm_sz_t);
-static hm_sz_t const HM_INITIAL_CAP = 16 * 1024 * 1024;
+static hm_sz_t const HM_INITIAL_CAP = 1024;
 typedef struct {
   void* k;
   hm_sz_t k_sz;
