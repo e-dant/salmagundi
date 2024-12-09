@@ -100,29 +100,25 @@ hm_sz_t hm_put(hm_t* map, void* k, hm_sz_t k_sz, void* v, hm_sz_t v_sz) {
   hm_item_t* item = &map->items[idx];
   if (is_overwrite) {
     // An update; The key already exists here, but the value changed.
+    // Need new memory for the new value.
     item->v = realloc(map->items[idx].v, v_sz);
-    if (item->v == NULL) {
-      free(item->v);
-      memset(item, 0, sizeof(hm_item_t));
-      return -1;
-    }
-    memcpy(item->v, v, v_sz);
   } else {
     // A "pure" insertion; Nothing exists here yet.
+    // Need new memory for the key and value.
     memset(item, 0, sizeof(hm_item_t));
     item->k = malloc(k_sz);
     item->v = malloc(v_sz);
-    memcpy(item->k, k, k_sz);
-    memcpy(item->v, v, v_sz);
-    if (item->k == NULL || item->v == NULL) {
-      free(item->k);
-      free(item->v);
-      memset(item, 0, sizeof(hm_item_t));
-      return -1;
-    }
   }
-  map->items[idx].k_sz = k_sz;
-  map->items[idx].v_sz = v_sz;
+  if (item->k == NULL || item->v == NULL) {
+    free(item->k);
+    free(item->v);
+    memset(item, 0, sizeof(hm_item_t));
+    return -1;
+  }
+  memcpy(item->k, k, k_sz);
+  memcpy(item->v, v, v_sz);
+  item->k_sz = k_sz;
+  item->v_sz = v_sz;
   map->sz += !is_overwrite;
   return idx;
 }
