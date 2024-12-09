@@ -97,23 +97,24 @@ hm_sz_t hm_put(hm_t* map, void* k, hm_sz_t k_sz, void* v, hm_sz_t v_sz) {
 #endif
     }
   }
-  memset(&map->items[idx], 0, sizeof(hm_item_t));
-  void* k_mem = malloc(k_sz);
-  if (k_mem == NULL) {
-    return -1;
-  }
+  void* k_mem = NULL;
   void* v_mem = NULL;
   if (is_overwrite) {
+    k_mem = map->items[idx].k;
     v_mem = realloc(map->items[idx].v, v_sz);
+    memcpy(v_mem, v, v_sz);
   } else {
+    memset(&map->items[idx], 0, sizeof(hm_item_t));
+    k_mem = malloc(k_sz);
     v_mem = malloc(v_sz);
+    memcpy(k_mem, k, k_sz);
+    memcpy(v_mem, v, v_sz);
+    if (k_mem == NULL || v_mem == NULL) {
+      free(k_mem);
+      free(v_mem);
+      return -1;
+    }
   }
-  if (v_mem == NULL) {
-    free(k_mem);
-    return -1;
-  }
-  memcpy(k_mem, k, k_sz);
-  memcpy(v_mem, v, v_sz);
   map->items[idx].k = k_mem;
   map->items[idx].k_sz = k_sz;
   map->items[idx].v = v_mem;
