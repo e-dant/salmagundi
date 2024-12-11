@@ -1,4 +1,5 @@
 #include "salmagundi.h"
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdio.h>
@@ -6,20 +7,6 @@
 #ifndef HM_DEBUG
 #error "HM_DEBUG must be defined for map introspection"
 #endif
-
-#define FILEBASENAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-
-#define assert(condition)                                                    \
-  if (! (condition)) {                                                       \
-    fprintf(stderr, "[%s:%d: No] %s\n", FILEBASENAME, __LINE__, #condition); \
-    abort();                                                                 \
-  }
-
-#define assert_verbose(condition)                                            \
-  if (assert(condition)) {                                                   \
-    fprintf(stderr, "[%s:%d: Ok] %s\n", FILEBASENAME, __LINE__, #condition); \
-  }
-
 
 void hm_print_item(hm_item_t item) {
   printf("k=@%p, k_sz=%u, v=@%p, v_sz=%u\n", item.k, item.k_sz, item.v, item.v_sz);
@@ -137,7 +124,7 @@ void test_hm_torture(int8_t collision_rate, hm_hash_func hash_func) {
                 : collision_rate == MEDIUM_COLLISION_RATE  ? 10000
                                                            : 10000;
   fprintf(stderr, "k_sz=%d, v_sz=%d, torture_n=%d\n", k_sz, v_sz, torture_n);
-  int print_at = -1;//torture_n / 10;
+  int print_at = -1; // Or torture_n / 10 for verbose output
   hm_t* map = hm_open(hash_func, hm_cmp_str);
   void* r = rand_open();
   for (int i = 0; i < torture_n; i++) {
@@ -187,14 +174,45 @@ void test_hm_torture_high_collision_rate(void) {
   test_hm_torture(HIGH_COLLISION_RATE, hm_hash_rapidhash);
 }
 
+hm_hash_t hash_always_collide_func(void const* k, hm_sz_t k_sz) {
+  (void)k;
+  (void)k_sz;
+  return 0;
+}
+
+// For a map with three colliding keys, k1..3,
+// if the entry at k2 is deleted, the entry at k3 should be accessible.
+void test_hm_deleted_colliding_keys() {
+  hm_t* map = hm_open(hash_always_collide_func, hm_cmp_str);
+  char* k1 = "k1";
+  char* k2 = "k2";
+  char* k3 = "k3";
+  char* v = "v";
+  hm_put(map, k1, strlen(k1), v, strlen(v));
+  hm_put(map, k2, strlen(k2), v, strlen(v));
+  hm_put(map, k3, strlen(k3), v, strlen(v));
+  assert(map->sz == 3);
+  assert(hm_get(map, k1, strlen(k1)).k != NULL);
+  assert(hm_get(map, k2, strlen(k2)).k != NULL);
+  assert(hm_get(map, k3, strlen(k3)).k != NULL);
+  hm_del(map, k2, strlen(k2));
+  assert(map->sz == 2);
+  assert(hm_get(map, k1, strlen(k1)).k != NULL);
+  assert(hm_get(map, k2, strlen(k2)).k == NULL);
+  assert(hm_get(map, k3, strlen(k3)).k != NULL);
+  hm_print_hm_detail(map);
+  hm_close(map);
+}
+
 int main(int argc, char** argv) {
   if (argc != 1) {
     printf("%s takes no arguments.\n", argv[0]);
     return 1;
   }
-  //test_hm_lifetime();
-  //test_hm_of_int_int();
-  //test_hm_of_str_str();
+  test_hm_deleted_colliding_keys();
+  test_hm_lifetime();
+  test_hm_of_int_int();
+  test_hm_of_str_str();
   test_hm_torture_low_collision_rate();
   test_hm_torture_medium_collision_rate();
   test_hm_torture_high_collision_rate();

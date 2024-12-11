@@ -34,9 +34,7 @@ hm_hash_t hm_hash_rapidhash(void const* k, hm_sz_t k_sz) {
 }
 
 int8_t hm_cmp_str(void const* a, hm_sz_t a_sz, void const* b, hm_sz_t b_sz) {
-  if (a_sz != b_sz)
-    return 1;
-  return memcmp(a, b, a_sz);
+  return (a_sz == b_sz) ? memcmp(a, b, a_sz) : -1;
 }
 
 hm_t* hm_open(hm_hash_func hash, hm_cmp_func cmp) {
@@ -77,6 +75,9 @@ void hm_grow(hm_t* map) {
     Ref https://en.wikipedia.org/wiki/Linear_probing */
 hm_sz_t hm_put(hm_t* map, void* k, hm_sz_t k_sz, void* v, hm_sz_t v_sz) {
   if (map->sz >= map->cap * 0.75) {
+    // It is healthy not to use the map at its full capacity.
+    // Because of the linear probing strategy, index
+    // collisions (and "entanglements") become more likely as the map fills up.
     hm_grow(map);
   }
   hm_sz_t idx = map->hash(k, k_sz) % map->cap;
@@ -141,15 +142,37 @@ hm_item_t hm_get(hm_t* map, void* k, hm_sz_t k_sz) {
 
 int8_t hm_del(hm_t* map, void* k, hm_sz_t k_sz) {
   hm_sz_t idx = map->hash(k, k_sz) % map->cap;
-  while (map->items[idx].k != NULL) {
-    if (map->cmp(map->items[idx].k, map->items[idx].k_sz, k, k_sz) == 0) {
-      free(map->items[idx].k);
-      free(map->items[idx].v);
-      memset(&map->items[idx], 0, sizeof(hm_item_t));
-      map->sz--;
-      return -1;
+  while (1) {
+    hm_item_t* item = &map->items[idx];
+    if (item->k == NULL) {
+      break;
     }
-    idx = (idx + 1) % map->cap;
+    if (map->cmp(item->k, item->k_sz, k, k_sz) != 0) {
+      idx = (idx + 1) % map->cap;
+      continue;
+    }
+    free(item->k);
+    free(item->v);
+    memset(item, 0, sizeof(hm_item_t));
+    map->sz--;
+    // Cannot return just yet. There might be collisions (same hash, different key)
+    // right after this index, which we need to shift back.
+    while (1) {
+      hm_sz_t next_idx = (idx + 1) % map->cap;
+      hm_item_t* next_item = &map->items[next_idx];
+      if (next_item->k == NULL) {
+        break;
+      }
+      if (map->hash(next_item->k, next_item->k_sz) % map->cap == next_idx) {
+        // Next item is at its "natural" index. No need to shift it back.
+        // Unlikely; The key->index mapping is a bit entangled if we're here too often.
+        break;
+      }
+      memcpy(item, next_item, sizeof(hm_item_t));
+      memset(next_item, 0, sizeof(hm_item_t));
+      idx = next_idx;
+    }
+    return 1;
 #ifdef HM_DEBUG
     map->n_probe++;
 #endif
