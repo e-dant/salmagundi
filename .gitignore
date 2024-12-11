@@ -1,3 +1,5 @@
-compile_commands.json
-out
 .cache
+compile_commands.json
+corpus*
+out
+build
