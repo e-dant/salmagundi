@@ -39,20 +39,30 @@ int8_t hm_cmp_str(void const* a, hm_sz_t a_sz, void const* b, hm_sz_t b_sz) {
 
 hm_t* hm_open(hm_hash_func hash, hm_cmp_func cmp) {
   hm_t* map = calloc(sizeof(hm_t), 1);
+  if (map == NULL) {
+    return NULL;
+  }
   map->items = calloc(HM_INITIAL_CAP, sizeof(hm_item_t));
+  if (map->items == NULL) {
+    free(map);
+    return NULL;
+  }
   map->cap = HM_INITIAL_CAP;
   map->hash = hash;
   map->cmp = cmp;
   return map;
 }
 
-void hm_grow(hm_t* map) {
+int8_t hm_grow(hm_t* map) {
 #ifdef HM_DEBUG
   printf("Growing map of sz=%u from cap=%u to cap=%u\n", map->sz, map->cap, map->cap * 2);
   map->n_grow++;
 #endif
   hm_sz_t new_capacity = map->cap * 2;
   hm_item_t* new_entries = calloc(new_capacity, sizeof(hm_item_t));
+  if (new_entries == NULL) {
+    return -1;
+  }
   for (hm_sz_t i = 0; i < map->cap; i++) {
     if (map->items[i].k != NULL) {
       hm_item_t item = map->items[i];
@@ -69,6 +79,7 @@ void hm_grow(hm_t* map) {
 #ifdef HM_DEBUG
   printf("Map grown, cap=%u, sz=%u\n", map->cap, map->sz);
 #endif
+  return 0;
 }
 
 /*  A linear collision resolution strategy
@@ -78,7 +89,9 @@ hm_sz_t hm_put(hm_t* map, void* k, hm_sz_t k_sz, void* v, hm_sz_t v_sz) {
     // It is healthy not to use the map at its full capacity.
     // Because of the linear probing strategy, index
     // collisions (and "entanglements") become more likely as the map fills up.
-    hm_grow(map);
+    if (hm_grow(map) != 0) {
+      return -1;
+    }
   }
   hm_sz_t idx = map->hash(k, k_sz) % map->cap;
   hm_sz_t is_overwrite = 0;

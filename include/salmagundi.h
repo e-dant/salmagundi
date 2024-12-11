@@ -39,7 +39,7 @@ hm_t* hm_open(hm_hash_func hash, hm_cmp_func cmp);
 hm_sz_t hm_put(hm_t* map, void* k, hm_sz_t k_sz, void* v, hm_sz_t v_sz);
 hm_item_t hm_get(hm_t* map, void* k, hm_sz_t k_sz);
 int8_t hm_del(hm_t* map, void* k, hm_sz_t k_sz);
-void hm_grow(hm_t* map);
+int8_t hm_grow(hm_t* map);
 void hm_close(hm_t* map);
 
 #ifdef __cplusplus
