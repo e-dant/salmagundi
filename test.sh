@@ -1,6 +1,6 @@
 #!/bin/bash
-set -eu
-PATH="$(realpath "$(dirname "$0")/build"):$PATH"
-cd /tmp
-fuzz-salmagundi -max_len=65538 -jobs=$(nproc) -runs=9999
-test-salmagundi
+set -eux
+cd "$(dirname "$0")"
+test -d fuzz-corpus || mkdir fuzz-corpus
+build/fuzz-salmagundi -max_len=65538 -runs=10000 fuzz-corpus
+build/test-salmagundi
